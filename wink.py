@@ -1,10 +1,17 @@
 import numpy as np  
 import cv2  
-import dlib  
+import dlib
+import argparse
 from scipy.spatial import distance as dist  
    
 PREDICTOR_PATH = "shape_predictor_68_face_landmarks.dat"  
    
+ap = argparse.ArgumentParser()
+ap.add_argument("-c", "--cascade", type=str,
+	default="haarcascade_eye.xml",
+	help="haarcascade_eye.xml")
+args = vars(ap.parse_args())
+
 FULL_POINTS = list(range(0, 68))  
 FACE_POINTS = list(range(17, 68))  
    
@@ -26,27 +33,24 @@ TOTAL_LEFT = 0
 COUNTER_RIGHT = 0  
 TOTAL_RIGHT = 0  
    
-def eye_aspect_ratio(eye):  
-   # compute the euclidean distances between the two sets of  
-   # vertical eye landmarks (x, y)-coordinates
+def eye_aspect_ratio(eye): 
+   # vertical landmarks mata (x, y)-kordinat
    A = dist.euclidean(eye[1], eye[5])
    B = dist.euclidean(eye[2], eye[4])  
-   
-   # compute the euclidean distance between the horizontal  
-   # eye landmark (x, y)-coordinates  
+    
+   # horizontal landmark mata (x, y)-kordinat  
    C = dist.euclidean(eye[0], eye[3])  
    
-   # compute the eye aspect ratio  
-   ear = (A + B) / (2.0 * C)  
+   # compute aspek rasio mata 
+   ear = (A + B) / (2.0 * C)
    
-   # return the eye aspect ratio
    return ear  
    
 detector = dlib.get_frontal_face_detector()  
    
 predictor = dlib.shape_predictor(PREDICTOR_PATH)  
    
- # Start capturing the WebCam  
+ # Memulai menjalankan kamera  
 video_capture = cv2.VideoCapture(1)  
    
 while True:
@@ -83,7 +87,7 @@ while True:
             else:
                 if COUNTER_LEFT >= EYE_AR_CONSEC_FRAMES:
                     TOTAL_LEFT += 1
-                    print("Left eye winked")
+                    print("Kedipan mata kiri")
                     COUNTER_LEFT = 0
 
             if ear_right < EYE_AR_THRESH:
@@ -91,13 +95,13 @@ while True:
             else:
                 if COUNTER_RIGHT >= EYE_AR_CONSEC_FRAMES:
                     TOTAL_RIGHT += 1
-                    print("Right eye winked")
+                    print("Kedipan mata kanan")
                     COUNTER_RIGHT = 0
 
-            cv2.putText(frame, "Wink Left : {}".format(TOTAL_LEFT), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
-            cv2.putText(frame, "Wink Right: {}".format(TOTAL_RIGHT), (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
+            cv2.putText(frame, "Kedipan Kiri   : {}".format(TOTAL_LEFT), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
+            cv2.putText(frame, "Kedipan Kanan: {}".format(TOTAL_RIGHT), (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
 
-    cv2.imshow("Faces found", frame)
+    cv2.imshow("Deteksi Kedipan Mata", frame)
 
     ch = 0xFF & cv2.waitKey(1)
     if ch == ord("q"):
